@@ -34,18 +34,18 @@ public class UserEntity {
     @Column(nullable = false, length = 255, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 100)
     private String password;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public static UserEntity from(String userId, CreateUserCommand command) {
+    public static UserEntity from(String userId, String encodedPassword, CreateUserCommand command) {
         return UserEntity.builder()
             .userId(userId)
             .name(command.getName())
             .email(command.getEmail())
-            .password(command.getPassword())
+            .password(encodedPassword)
             .createdAt(LocalDateTime.now())
             .build();
     }

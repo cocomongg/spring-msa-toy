@@ -6,6 +6,7 @@ import com.example.userservice.service.dto.CreateUserCommand;
 import com.example.userservice.service.dto.User;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -13,9 +14,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public User createUser(CreateUserCommand command) {
-        UserEntity userEntity = UserEntity.from(UUID.randomUUID().toString(), command);
+        String userId = UUID.randomUUID().toString();
+        String encodedPassword = passwordEncoder.encode(command.getPassword());
+        UserEntity userEntity = UserEntity.from(userId, encodedPassword, command);
+
         UserEntity savedUserEntity = userRepository.save(userEntity);
 
         return User.from(savedUserEntity);
