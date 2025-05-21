@@ -9,6 +9,8 @@ import com.example.userservice.service.dto.CreateUserCommand;
 import com.example.userservice.service.dto.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,10 +37,12 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public CreateUserResponse createUser(@Valid @RequestBody UserRequest.CreateUserRequest request) {
+    public ResponseEntity<CreateUserResponse> createUser(@Valid @RequestBody UserRequest.CreateUserRequest request) {
         CreateUserCommand createUserCommand = userMapper.toCreateUserCommand(request);
         User user = userService.createUser(createUserCommand);
 
-        return userMapper.toCreateUserResponse(user);
+        CreateUserResponse createUserResponse = userMapper.toCreateUserResponse(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(createUserResponse);
     }
 }
