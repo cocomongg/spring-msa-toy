@@ -18,10 +18,10 @@ public class SecurityConfig {
         http.csrf(CsrfConfigurer::disable);
 
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/welcome").permitAll()
-                .requestMatchers("/health-check").permitAll()
+                .requestMatchers("/user-service/welcome").permitAll()
+                .requestMatchers("/user-service/health-check").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user-service/users/**").permitAll()
                 .anyRequest().authenticated());
 
         http.headers((headers) ->

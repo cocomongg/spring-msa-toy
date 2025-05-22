@@ -9,6 +9,7 @@ import com.example.userservice.service.dto.CreateUserCommand;
 import com.example.userservice.service.dto.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,18 +18,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/")
+@RequestMapping("/user-service")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final Environment env;
     private final Greeting greeting;
 
     @GetMapping("/health-check")
     public String healthCheck() {
-        return "User Service is up and running!";
+        return String.format("It's Working in User Service on Port %s",
+            env.getProperty("local.server.port"));
     }
 
     @GetMapping("/welcome")
