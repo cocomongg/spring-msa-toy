@@ -25,4 +25,17 @@ public class UserRequest {
         private String password;
     }
 
+    @Getter
+    @NoArgsConstructor
+    public static class LoginRequest {
+        @NotNull(message = "Email cannot be null")
+        @Size(min = 2, message = "Email must be at least 2 characters")
+        @Email
+        private String email;
+
+        @NotNull(message = "Password cannot be null")
+        @Size(min = 8, message = "Password must be at least 8 characters")
+        private String password;
+    }
+
 }
