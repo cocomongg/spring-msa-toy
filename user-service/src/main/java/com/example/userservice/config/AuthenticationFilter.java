@@ -1,23 +1,46 @@
 package com.example.userservice.config;
 
 import com.example.userservice.controller.dto.UserRequest.LoginRequest;
+import com.example.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import lombok.RequiredArgsConstructor;
+import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
+    private final UserService userService;
+    private final SecretKey secretKey;
+    private final Long expirationTime;
+
+    public AuthenticationFilter(AuthenticationManager authenticationManager,
+        ObjectMapper objectMapper, UserService userService, Environment env) {
+        super(authenticationManager);
+        this.objectMapper = objectMapper;
+        this.userService = userService;
+
+        String secretKey = env.getProperty("token.secret-key", "G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=");
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+
+        this.expirationTime = Long.parseLong(env.getProperty("token.expiration-time", "3600000"));
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -43,6 +66,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
-        // todo
+
+        String email = ((User)authResult.getPrincipal()).getUsername();
+        com.example.userservice.service.dto.User user = userService.getUserByEmail(email);
+
+        String token = Jwts.builder()
+            .subject(user.getUserId())
+            .expiration(new Date(System.currentTimeMillis() + expirationTime))
+            .signWith(this.secretKey)
+            .compact();
+
+        response.addHeader("token", token);
+        response.addHeader("userId", user.getUserId());
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -47,9 +48,9 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager,
-        ObjectMapper objectMapper) {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(objectMapper);
-        authenticationFilter.setAuthenticationManager(authenticationManager);
+        ObjectMapper objectMapper, UserService userService, Environment env) {
+        AuthenticationFilter authenticationFilter =
+            new AuthenticationFilter(authenticationManager, objectMapper, userService, env);
         return authenticationFilter;
     }
 

@@ -46,6 +46,16 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
+    public User getUserByEmail(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+
+        List<Order> orders = new ArrayList<>(); // todo
+
+        return User.from(userEntity, orders);
+    }
+
+    @Transactional(readOnly = true)
     public List<User> getUsers() {
         List<UserEntity> userEntityList = userRepository.findAll();
         List<User> userList = new ArrayList<>();
