@@ -2,6 +2,7 @@ package com.example.userservice.config;
 
 import com.example.userservice.controller.dto.UserRequest.LoginRequest;
 import com.example.userservice.service.UserService;
+import com.example.userservice.service.dto.UserInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -68,15 +69,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         throws IOException, ServletException {
 
         String email = ((User)authResult.getPrincipal()).getUsername();
-        com.example.userservice.service.dto.User user = userService.getUserByEmail(email);
+        UserInfo userInfo = userService.getUserByEmail(email);
 
         String token = Jwts.builder()
-            .subject(user.getUserId())
+            .subject(userInfo.getUserId())
             .expiration(new Date(System.currentTimeMillis() + expirationTime))
             .signWith(this.secretKey)
             .compact();
 
         response.addHeader("token", token);
-        response.addHeader("userId", user.getUserId());
+        response.addHeader("userId", userInfo.getUserId());
     }
 }

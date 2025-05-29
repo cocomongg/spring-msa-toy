@@ -12,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
-public class User {
+public class UserInfo {
     private final String userId;
     private final String email;
     private final String name;
     private final LocalDateTime createdAt;
     private final List<Order> orders;
 
-    public static User from(UserEntity userEntity, List<Order> orders) {
-        return User.builder()
+    public static UserInfo from(UserEntity userEntity, List<Order> orders) {
+        return UserInfo.builder()
             .userId(userEntity.getUserId())
             .email(userEntity.getEmail())
             .name(userEntity.getName())
@@ -29,8 +29,8 @@ public class User {
             .build();
     }
 
-    public static User from(UserEntity userEntity) {
-        return User.builder()
+    public static UserInfo from(UserEntity userEntity) {
+        return UserInfo.builder()
             .userId(userEntity.getUserId())
             .email(userEntity.getEmail())
             .name(userEntity.getName())
