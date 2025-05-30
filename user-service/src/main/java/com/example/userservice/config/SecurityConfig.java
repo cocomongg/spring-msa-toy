@@ -30,6 +30,7 @@ public class SecurityConfig {
         http.csrf(CsrfConfigurer::disable);
 
         http.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/**")
                 .access(hasIpAddress("127.0.0.1")));
 
