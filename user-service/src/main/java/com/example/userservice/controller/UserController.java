@@ -8,7 +8,7 @@ import com.example.userservice.controller.dto.UserResponse.GetUserResponse;
 import com.example.userservice.mapper.UserMapper;
 import com.example.userservice.service.UserService;
 import com.example.userservice.service.dto.CreateUserCommand;
-import com.example.userservice.service.dto.User;
+import com.example.userservice.service.dto.UserInfo;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +44,8 @@ public class UserController {
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser(@Valid @RequestBody UserRequest.CreateUserRequest request) {
         CreateUserCommand createUserCommand = userMapper.toCreateUserCommand(request);
-        User user = userService.createUser(createUserCommand);
-        CreateUserResponse createUserResponse = userMapper.toCreateUserResponse(user);
+        UserInfo userInfo = userService.createUser(createUserCommand);
+        CreateUserResponse createUserResponse = userMapper.toCreateUserResponse(userInfo);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(createUserResponse);
@@ -53,8 +53,8 @@ public class UserController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<GetUserResponse> getUser(@PathVariable String userId) {
-        User user = userService.getUserByUserId(userId);
-        GetUserResponse getUserResponse = userMapper.toGetUserResponse(user);
+        UserInfo userInfo = userService.getUserByUserId(userId);
+        GetUserResponse getUserResponse = userMapper.toGetUserResponse(userInfo);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(getUserResponse);
@@ -62,8 +62,8 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<GetUserListResponse> getUsers() {
-        List<User> users = userService.getUsers();
-        GetUserListResponse getUserListResponse = userMapper.toGetUserListResponse(users);
+        List<UserInfo> userInfos = userService.getUsers();
+        GetUserListResponse getUserListResponse = userMapper.toGetUserListResponse(userInfos);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(getUserListResponse);
