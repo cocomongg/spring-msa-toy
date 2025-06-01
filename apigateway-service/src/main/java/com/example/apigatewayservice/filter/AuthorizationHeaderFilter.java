@@ -1,13 +1,11 @@
 package com.example.apigatewayservice.filter;
 
+import com.example.apigatewayservice.config.JwtProvider;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -20,14 +18,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
+    private final JwtProvider jwtProvider;
 
-    private final SecretKey secretKey;
-
-    public AuthorizationHeaderFilter(Environment env) {
+    public AuthorizationHeaderFilter(JwtProvider jwtProvider) {
         super(Config.class);
-        String secretKeyStr = env.getProperty("token.secret-key", "G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=");
-        byte[] keyBytes = secretKeyStr.getBytes(StandardCharsets.UTF_8);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        this.jwtProvider = jwtProvider;
     }
 
     public static class Config {
@@ -64,10 +59,12 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
     }
 
     private boolean isValidJwt(String jwtToken) {
+        SecretKey secretKey = jwtProvider.getSecretKey();
+
         String subject;
         try {
              subject = Jwts.parser()
-                .verifyWith(this.secretKey)
+                .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(jwtToken)
                 .getPayload()

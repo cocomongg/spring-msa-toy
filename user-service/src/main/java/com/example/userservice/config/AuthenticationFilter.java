@@ -27,20 +27,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
     private final UserService userService;
-    private final SecretKey secretKey;
-    private final Long expirationTime;
+    private final JwtProvider jwtProvider;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
-        ObjectMapper objectMapper, UserService userService, Environment env) {
+        ObjectMapper objectMapper, UserService userService, JwtProvider jwtProvider) {
         super(authenticationManager);
         this.objectMapper = objectMapper;
         this.userService = userService;
-
-        String secretKey = env.getProperty("token.secret-key", "G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=");
-        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
-
-        this.expirationTime = Long.parseLong(env.getProperty("token.expiration-time", "3600000"));
+        this.jwtProvider = jwtProvider;
     }
 
     @Override
@@ -71,10 +65,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String email = ((User)authResult.getPrincipal()).getUsername();
         UserInfo userInfo = userService.getUserByEmail(email);
 
+        SecretKey secretKey = jwtProvider.getSecretKey();
+        Long expirationTime = jwtProvider.getExpirationTime();
+
         String token = Jwts.builder()
             .subject(userInfo.getUserId())
             .expiration(new Date(System.currentTimeMillis() + expirationTime))
-            .signWith(this.secretKey)
+            .signWith(secretKey)
             .compact();
 
         response.addHeader("token", token);

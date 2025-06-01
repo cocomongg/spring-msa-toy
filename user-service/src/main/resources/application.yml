@@ -31,6 +31,8 @@ service:
   greeting:
     message: Welcome!
 
-token:
-  expiration-time: 3600000 # 1 hour in milliseconds
-  secret-key: G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans

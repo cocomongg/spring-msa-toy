@@ -30,6 +30,7 @@ public class SecurityConfig {
         http.csrf(CsrfConfigurer::disable);
 
         http.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/**")
                 .access(hasIpAddress("127.0.0.1")));
 
@@ -48,9 +49,9 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager,
-        ObjectMapper objectMapper, UserService userService, Environment env) {
+        ObjectMapper objectMapper, UserService userService, JwtProvider jwtProvider) {
         AuthenticationFilter authenticationFilter =
-            new AuthenticationFilter(authenticationManager, objectMapper, userService, env);
+            new AuthenticationFilter(authenticationManager, objectMapper, userService, jwtProvider);
         return authenticationFilter;
     }
 
