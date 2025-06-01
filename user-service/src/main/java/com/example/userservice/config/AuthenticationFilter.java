@@ -27,16 +27,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
     private final UserService userService;
-    private final Environment env;
-//    private final SecretKey secretKey;
-//    private final Long expirationTime;
+    private final JwtProvider jwtProvider;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
-        ObjectMapper objectMapper, UserService userService, Environment env) {
+        ObjectMapper objectMapper, UserService userService, JwtProvider jwtProvider) {
         super(authenticationManager);
         this.objectMapper = objectMapper;
         this.userService = userService;
-        this.env = env;
+        this.jwtProvider = jwtProvider;
     }
 
     @Override
@@ -67,11 +65,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String email = ((User)authResult.getPrincipal()).getUsername();
         UserInfo userInfo = userService.getUserByEmail(email);
 
-
-        String secretKeyStr = env.getProperty("token.secret-key", "G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=");
-        byte[] keyBytes = secretKeyStr.getBytes(StandardCharsets.UTF_8);
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-        long expirationTime = Long.parseLong(env.getProperty("token.expiration-time", "3600000"));
+        SecretKey secretKey = jwtProvider.getSecretKey();
+        Long expirationTime = jwtProvider.getExpirationTime();
 
         String token = Jwts.builder()
             .subject(userInfo.getUserId())
