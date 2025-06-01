@@ -21,13 +21,12 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
 
-    private final SecretKey secretKey;
+//    private final SecretKey secretKey;
+    private final Environment env;
 
     public AuthorizationHeaderFilter(Environment env) {
         super(Config.class);
-        String secretKeyStr = env.getProperty("token.secret-key", "G3J1bVZFT0w1bWRpWVN3b0dFT3dFc0JvTFhRMTZURlk=");
-        byte[] keyBytes = secretKeyStr.getBytes(StandardCharsets.UTF_8);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        this.env = env;
     }
 
     public static class Config {
@@ -65,9 +64,17 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
 
     private boolean isValidJwt(String jwtToken) {
         String subject;
+
+        String secretKeyStr = env.getProperty("token.secret-key");
+        if(!StringUtils.hasText(secretKeyStr)) {
+            throw new RuntimeException("secret-key is empty");
+        }
+        byte[] keyBytes = secretKeyStr.getBytes(StandardCharsets.UTF_8);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+
         try {
              subject = Jwts.parser()
-                .verifyWith(this.secretKey)
+                .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(jwtToken)
                 .getPayload()
