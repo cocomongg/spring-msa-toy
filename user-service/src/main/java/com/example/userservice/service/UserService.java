@@ -3,6 +3,7 @@ package com.example.userservice.service;
 import com.example.userservice.model.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.service.dto.CreateUserCommand;
+import com.example.userservice.service.dto.GetOrdersResponse;
 import com.example.userservice.service.dto.Order;
 import com.example.userservice.service.dto.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
@@ -10,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +30,8 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RestTemplate restTemplate;
+    private final Environment env;
 
     @Transactional
     public UserInfo createUser(CreateUserCommand command) {
@@ -41,9 +49,12 @@ public class UserService implements UserDetailsService {
         UserEntity userEntity = userRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("User not found userId: " + userId));
 
-        List<Order> orders = new ArrayList<>(); // todo
+        String orderUrl = String.format(env.getProperty("order-service.url"), userId);
+        ResponseEntity<GetOrdersResponse> getOrderResponse = restTemplate.exchange(orderUrl, HttpMethod.GET, null,
+            new ParameterizedTypeReference<GetOrdersResponse>() {});
+        GetOrdersResponse getOrderResponseBody  = getOrderResponse.getBody();
 
-        return UserInfo.from(userEntity, orders);
+        return UserInfo.from(userEntity, getOrderResponseBody.getOrders());
     }
 
     @Transactional(readOnly = true)

@@ -33,7 +33,7 @@ public class UserMapper {
             UserResponse.OrderItem orderItem = UserResponse.OrderItem.builder()
                     .orderId(order.getOrderId())
                     .productId(order.getProductId())
-                    .qty(order.getQty())
+                    .qty(order.getQuantity())
                     .unitPrice(order.getUnitPrice())
                     .totalPrice(order.getTotalPrice())
                     .createdAt(order.getCreatedAt())

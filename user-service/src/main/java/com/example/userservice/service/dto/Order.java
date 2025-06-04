@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 public class Order {
     private final String orderId;
     private final String productId;
-    private final Integer qty;
+    private final String userId;
+    private final Integer quantity;
     private final Integer unitPrice;
     private final Integer totalPrice;
     private final LocalDateTime createdAt;
